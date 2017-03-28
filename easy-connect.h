@@ -24,6 +24,9 @@ OdinWiFiInterface wifi;
 #elif MBED_CONF_APP_NETWORK_INTERFACE == ETHERNET
 #include "EthernetInterface.h"
 EthernetInterface eth;
+#elif MBED_CONF_APP_NETWORK_INTERFACE == CELL
+#include "C027Interface.h"
+C027Interface cell;
 #elif MBED_CONF_APP_NETWORK_INTERFACE == MESH_LOWPAN_ND
 #define MESH
 #include "NanostackInterface.h"
@@ -91,6 +94,12 @@ NetworkInterface* easy_connect(bool log_messages = false) {
     }
     connect_success = eth.connect();
     network_interface = &eth;
+#elif MBED_CONF_APP_NETWORK_INTERFACE == CELL
+    if (log_messages) {
+        printf("[EasyConnect] Using CELL\n");
+    }
+    connect_success = cell.connect(MBED_CONF_APP_APN);
+    network_interface = &cell;
 #endif
 #ifdef MESH
     if (log_messages) {
@@ -112,22 +121,24 @@ NetworkInterface* easy_connect(bool log_messages = false) {
         return NULL;
     }
     const char *ip_addr  = network_interface->get_ip_address();
-    const char *mac_addr = network_interface->get_mac_address();
+    //const char *mac_addr = network_interface->get_mac_address();
     if (ip_addr == NULL) {
         if (log_messages) {
             printf("[EasyConnect] ERROR - No IP address\n");
         }
         return NULL;
     }
+    /**
     if (mac_addr == NULL) {
         if (log_messages) {
             printf("[EasyConnect] ERROR - No MAC address\n");
         }
         return NULL;
     }
+    **/
     if (log_messages) {
         printf("[EasyConnect] IP address %s\n", ip_addr);
-        printf("[EasyConnect] MAC address %s\n", mac_addr);
+        //printf("[EasyConnect] MAC address %s\n", mac_addr);
     }
     return network_interface;
 }
